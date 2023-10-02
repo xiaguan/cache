@@ -1,0 +1,27 @@
+[package]
+name = "common-cache"
+version = "0.1.0"
+authors = ["DatenLord <dev@datenlord.io>"]
+edition = "2021"
+description = "Distributed cloud native storage system"
+repository = "https://github.com/datenlord/datenlord"
+readme = "README.md"
+license = "MIT"
+keywords = ["Storage", "CSI", "K8S"]
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hashlink = "0.8.4"
+hashbrown = "0.14.0"
+bytes = "1.5.0"
+parking_lot = "0.12"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "cache_benchmark"
+harness = false
+
