@@ -18,12 +18,15 @@
 #[cfg(not(target_os = "macos"))]
 extern crate heapsize_;
 
-mod cache;
 mod meter;
 
-pub use cache::lru::LruCache;
-pub use cache::Cache;
+mod s3fifo;
+
+pub mod fifo;
+
+use std::ops::{Deref, DerefMut};
 pub use hashbrown::hash_map::DefaultHashBuilder;
+use hashlink::LruCache;
 pub use meter::bytes_meter::BytesMeter;
 pub use meter::count_meter::Count;
 pub use meter::count_meter::CountableMeter;
@@ -33,3 +36,21 @@ pub use meter::file_meter::FileSize;
 #[cfg(not(target_os = "macos"))]
 pub use meter::heap_meter::HeapSize;
 pub use meter::Meter;
+
+
+pub trait BasicCache<K,V> {
+    fn get_basic(&mut self, key: &K) -> Option<&V>;
+    fn put_basic(&mut self, key: K, value: V);
+}
+
+impl BasicCache<i32,i32> for LruCache<i32,i32> {
+    fn get_basic(&mut self, key: &i32) -> Option<&i32> {
+        LruCache::get(self,key)
+    }
+
+    fn put_basic(&mut self, key: i32, value: i32) {
+        LruCache::insert(self, key, value);
+    }
+}
+
+
