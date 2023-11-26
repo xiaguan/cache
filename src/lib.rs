@@ -22,9 +22,9 @@ mod meter;
 
 mod s3fifo;
 
+pub mod diskcache;
 pub mod fifo;
 
-use std::ops::{Deref, DerefMut};
 pub use hashbrown::hash_map::DefaultHashBuilder;
 use hashlink::LruCache;
 pub use meter::bytes_meter::BytesMeter;
@@ -36,21 +36,19 @@ pub use meter::file_meter::FileSize;
 #[cfg(not(target_os = "macos"))]
 pub use meter::heap_meter::HeapSize;
 pub use meter::Meter;
+use std::ops::{Deref, DerefMut};
 
-
-pub trait BasicCache<K,V> {
+pub trait BasicCache<K, V> {
     fn get_basic(&mut self, key: &K) -> Option<&V>;
     fn put_basic(&mut self, key: K, value: V);
 }
 
-impl BasicCache<i32,i32> for LruCache<i32,i32> {
+impl BasicCache<i32, i32> for LruCache<i32, i32> {
     fn get_basic(&mut self, key: &i32) -> Option<&i32> {
-        LruCache::get(self,key)
+        LruCache::get(self, key)
     }
 
     fn put_basic(&mut self, key: i32, value: i32) {
         LruCache::insert(self, key, value);
     }
 }
-
-
