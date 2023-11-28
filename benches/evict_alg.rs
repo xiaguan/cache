@@ -15,9 +15,9 @@ enum Command {
     Put(KeyType, ValueType),
 }
 
-const CACHE_SIZE: usize = 1000;
-const COMMAND_SIZE: usize = 100000;
-const RAND_RANGE: usize = 1000;
+const CACHE_SIZE: usize = 5000;
+const COMMAND_SIZE: usize = 1000000;
+const RAND_RANGE: usize = 6000;
 
 fn generate_bench_commands() -> Vec<Command> {
     let mut commands = Vec::new();
