@@ -72,12 +72,6 @@ impl DiskCache {
     /// Creates a new `DiskCache` with the given root path and default capacity.
     pub async fn open(root_path: impl AsRef<Path>) -> Result<Self> {
         tokio::fs::create_dir_all(root_path.as_ref()).await?;
-        // Remove previous cache file
-        tokio::fs::remove_file("/tmp/cache_big_file").await?;
-        OpenOptions::new()
-            .create(true)
-            .open("/tmp/cache_big_file")
-            .await?;
         Ok(DiskCache {
             map: DashMap::new(),
             root_path: root_path.as_ref().to_path_buf(),
@@ -116,14 +110,15 @@ impl DiskCache {
         if file_cache.len() == 0 {
             tokio::fs::create_dir_all(path_of_inum(&self.root_path, inum)).await?;
         }
-        let _path = path_of_block(&self.root_path, inum, block_id);
+        let path = path_of_block(&self.root_path, inum, block_id);
         let mut file = OpenOptions::new()
-            .append(true)
-            .open("/tmp/cache_big_file")
+            .write(true)
+            .create_new(true)
+            .open(path)
             .await?;
         // Apend block data to file
         file.write_all(block.get_data()).await?;
-        // file.sync_all().await?;
+        file.sync_all().await?;
         file_cache.insert(block_id, true);
         self.size
             .fetch_add(BLOCK_SIZE, std::sync::atomic::Ordering::SeqCst);
@@ -138,13 +133,9 @@ impl DiskCache {
                 if *existed {
                     let mut file = OpenOptions::new()
                         .read(true)
-                        .open("/tmp/cache_big_file")
+                        .open(path_of_block(&self.root_path, inum, block_id))
                         .await?;
                     let mut data = vec![0; BLOCK_SIZE];
-                    // Seek to the start of the block
-                    file.seek(std::io::SeekFrom::Start(block_id * BLOCK_SIZE as u64))
-                        .await?;
-                    // Read block data
                     file.read_exact(&mut data).await?;
                     return Ok(Some(Block::from(data)));
                 }
